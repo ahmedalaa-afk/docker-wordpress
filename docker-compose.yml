@@ -1,0 +1,51 @@
+services:
+
+  # Pull WordPress image from Docker Hub
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress # Name of the container
+    restart: always # Restart the container if it stops
+    ports:
+      - 8080:80 # Map port 8080 on the host to port 80 on the container
+    depends_on: # Wait for the database to start
+      - db
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306 # Database host
+      WORDPRESS_DB_USER: wp_user # Database user
+      WORDPRESS_DB_PASSWORD: wp_password # Database password
+      WORDPRESS_DB_NAME: wp_database # Database name
+    volumes:
+      - wordpress:/var/www/html # Persist data
+
+  # Pull MySQL image from Docker Hub
+  db:
+    image: mysql:8.0
+    container_name: mysql # Name of the container
+    restart: always # Restart the container if it stops
+    environment:
+      MYSQL_DATABASE: wp_database # Database name
+      MYSQL_USER: wp_user # Database user
+      MYSQL_PASSWORD: wp_password # Database password
+      MYSQL_ROOT_PASSWORD: root_password # Root password
+    volumes:
+      - db:/var/lib/mysql # Persist data
+
+  # Pull phpMyAdmin image from Docker Hub
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin # Name of the container
+    restart: always # Restart the container if it stops
+    ports:
+      - 8081:80 # Map port 8081 on the host to port 80 on the container
+    environment:
+      - PMA_ARBITRARY=1 # Allow access to phpMyAdmin from any host
+      - PMA_HOST=mysql # Database host
+      - PMA_USER=wp_user # Database user
+      - PMA_PASSWORD=wp_password # Database password
+    depends_on:
+      - db # Wait for the database to start
+
+# Volumes to store data
+volumes:
+  wordpress:
+  db:
